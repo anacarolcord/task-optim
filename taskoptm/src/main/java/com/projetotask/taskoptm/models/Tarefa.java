@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class Tarefa {
     private Long idTarefa;
     @Column(nullable = false)
     private String nomeTarefa;
-    private LocalTime duracao;
+    private LocalDateTime duracao;
     private String prioridade;
 
     //relacionamento n pra 1 muitas tarefas podem possuir 1 categoria
