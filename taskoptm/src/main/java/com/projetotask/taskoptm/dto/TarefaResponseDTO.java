@@ -10,6 +10,7 @@ import java.util.List;
 
 @Data
 public class TarefaResponseDTO {
+    private Long idTarefa;
     private String nomeTarefa;
     private LocalDateTime duracao;
     private String prioridade;
