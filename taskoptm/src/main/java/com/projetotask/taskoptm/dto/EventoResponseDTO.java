@@ -10,5 +10,5 @@ public class EventoResponseDTO {
     private Long idEvento;
     private String nomeEvento;
     private String descricaoEvento;
-    private List<Tarefa> tarefas;
+    private List<TarefaResponseDTO> tarefas;
 }

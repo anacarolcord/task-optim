@@ -22,7 +22,9 @@ public class Tarefa {
     @Column(nullable = false)
     private String nomeTarefa;
     private LocalDateTime duracao;
-    private String prioridade;
+
+    @Enumerated(EnumType.STRING)
+    private Prioridade prioridade;
 
     //relacionamento n pra 1 muitas tarefas podem possuir 1 categoria
     @ManyToOne

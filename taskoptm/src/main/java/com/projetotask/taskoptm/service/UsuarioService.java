@@ -1,7 +1,9 @@
 package com.projetotask.taskoptm.service;
 
+import com.projetotask.taskoptm.dto.TarefaResponseDTO;
 import com.projetotask.taskoptm.dto.UsuarioRequestDTO;
 import com.projetotask.taskoptm.dto.UsuarioResponseDTO;
+import com.projetotask.taskoptm.models.Tarefa;
 import com.projetotask.taskoptm.models.Usuario;
 import com.projetotask.taskoptm.repository.UsuarioRepository;
 import jakarta.websocket.ClientEndpoint;
@@ -15,10 +17,13 @@ import java.util.stream.Collectors;
 public class UsuarioService {
 
     private final UsuarioRepository repository;
+    private final TarefaService tarefaService;
 
-    public UsuarioService(UsuarioRepository repository) {
+    public UsuarioService(UsuarioRepository repository, TarefaService tarefaService) {
         this.repository = repository;
+        this.tarefaService = tarefaService;
     }
+
 
     public List<UsuarioResponseDTO> listar(){
         return repository.findAll()
@@ -68,7 +73,10 @@ public class UsuarioService {
         UsuarioResponseDTO dto = new UsuarioResponseDTO();
         dto.setIdUsuario(usuario.getIdUsuario());
         dto.setNomeUsuario(usuario.getNomeUsuario());
-        dto.setTarefas(usuario.getTarefas());
+        dto.setTarefas(usuario.getTarefas()
+                .stream()
+                .map(tarefaService::toTarefaResponseDTO)
+                .collect(Collectors.toList()));
 
         return dto;
     }

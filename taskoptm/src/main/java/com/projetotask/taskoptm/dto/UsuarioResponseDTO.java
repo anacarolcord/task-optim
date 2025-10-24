@@ -9,5 +9,5 @@ import java.util.List;
 public class UsuarioResponseDTO {
     private Long idUsuario;
     private String nomeUsuario;
-    private List<Tarefa> tarefas;
+    private List<TarefaResponseDTO> tarefas;
 }

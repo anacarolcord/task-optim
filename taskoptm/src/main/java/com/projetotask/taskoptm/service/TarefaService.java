@@ -2,6 +2,9 @@ package com.projetotask.taskoptm.service;
 
 import com.projetotask.taskoptm.dto.TarefaRequestDTO;
 import com.projetotask.taskoptm.dto.TarefaResponseDTO;
+import com.projetotask.taskoptm.dto.UsuarioResponseDTO;
+import com.projetotask.taskoptm.models.Evento;
+import com.projetotask.taskoptm.models.Prioridade;
 import com.projetotask.taskoptm.models.Tarefa;
 import com.projetotask.taskoptm.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +20,7 @@ public class TarefaService {
         this.repository = repository;
     }
 
-    public TarefaResponseDTO toResponseDTO(Tarefa tarefa){
+    public TarefaResponseDTO toTarefaResponseDTO(Tarefa tarefa){
         TarefaResponseDTO dto = new TarefaResponseDTO();
 
         dto.setNomeTarefa(tarefa.getNomeTarefa());
@@ -30,11 +33,11 @@ public class TarefaService {
     }
 
     public List<TarefaResponseDTO> listarTarefas() {
-        return repository.findAll().stream().map(this::toResponseDTO).collect(Collectors.toList());
+        return repository.findAll().stream().map(this::toTarefaResponseDTO).collect(Collectors.toList());
     }
 
     public TarefaResponseDTO buscarId(Long id){
-        return repository.findById(id).map(this::toResponseDTO).orElseThrow(()-> new RuntimeException("Tarefa não encontrada"));
+        return repository.findById(id).map(this::toTarefaResponseDTO).orElseThrow(()-> new RuntimeException("Tarefa não encontrada"));
     }
 
     public TarefaResponseDTO salvar(TarefaRequestDTO dados) {
@@ -48,7 +51,7 @@ public class TarefaService {
 
         repository.save(tarefa);
 
-        return toResponseDTO(tarefa);
+        return toTarefaResponseDTO(tarefa);
     }
 
     public TarefaResponseDTO atualizar(Long id, TarefaRequestDTO dados) {
@@ -62,11 +65,15 @@ public class TarefaService {
 
         Tarefa atualizada = repository.save(tarefa);
 
-        return toResponseDTO(atualizada);
+        return toTarefaResponseDTO(atualizada);
     }
 
     public void  excluir(Long id){
         repository.deleteById(id);
     }
+
+
+
+
 
 }
