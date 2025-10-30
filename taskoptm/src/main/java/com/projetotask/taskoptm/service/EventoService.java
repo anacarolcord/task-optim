@@ -2,8 +2,11 @@ package com.projetotask.taskoptm.service;
 
 import com.projetotask.taskoptm.dto.EventoRequestDTO;
 import com.projetotask.taskoptm.dto.EventoResponseDTO;
+import com.projetotask.taskoptm.dto.TarefaResponseDTO;
 import com.projetotask.taskoptm.models.Evento;
 import com.projetotask.taskoptm.repository.EventoRepository;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -13,9 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class EventoService {
     private final EventoRepository repository;
+    private final ModelMapper modelMapper;
 
-    public EventoService (EventoRepository repository){
+    public EventoService (EventoRepository repository, ModelMapper modelMapper){
         this.repository = repository;
+        this.modelMapper=modelMapper;
     }
 
     public EventoResponseDTO toResponseDTO(Evento evento){
@@ -24,7 +29,13 @@ public class EventoService {
         dto.setIdEvento(evento.getIdEvento());
         dto.setNomeEvento(evento.getNomeEvento());
         dto.setDescricaoEvento(evento.getDescricaoEvento());
-        dto.setTarefas(evento.getTarefas());
+
+        List<TarefaResponseDTO> tarefas = evento.getTarefas().stream()
+                        .map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class))
+                                .collect(Collectors.toList());
+
+        dto.setTarefas(tarefas);
+
 
         return dto;
 

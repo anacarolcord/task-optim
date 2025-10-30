@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -21,7 +22,7 @@ public class Tarefa {
     private Long idTarefa;
     @Column(nullable = false)
     private String nomeTarefa;
-    private LocalDateTime duracao;
+    private Duration duracao;
 
     @Enumerated(EnumType.STRING)
     private Prioridade prioridade;

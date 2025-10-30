@@ -6,6 +6,7 @@ import com.projetotask.taskoptm.models.Prioridade;
 import com.projetotask.taskoptm.models.Usuario;
 import lombok.Data;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class TarefaResponseDTO {
     private Long idTarefa;
     private String nomeTarefa;
-    private LocalDateTime duracao;
+    private Duration duracao;
     private Prioridade prioridade;
     private Categoria categoria;
     private Usuario usuario;

@@ -19,7 +19,8 @@ public class TarefaController {
 
     @GetMapping
     public List<TarefaResponseDTO> listarTarefas() {
-        return service.listarTarefas();
+         return service.listarTarefas();
+
     }
 
     @GetMapping("/{id}")

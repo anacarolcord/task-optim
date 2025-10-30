@@ -1,20 +1,26 @@
 package com.projetotask.taskoptm.service;
 
-import com.projetotask.taskoptm.dto.TarefaRequestDTO;
-import com.projetotask.taskoptm.dto.TarefaResponseDTO;
-import com.projetotask.taskoptm.dto.UsuarioResponseDTO;
-import com.projetotask.taskoptm.models.Evento;
-import com.projetotask.taskoptm.models.Prioridade;
-import com.projetotask.taskoptm.models.Tarefa;
+import com.projetotask.taskoptm.dto.*;
+import com.projetotask.taskoptm.models.*;
 import com.projetotask.taskoptm.repository.TarefaRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.aop.target.LazyInitTargetSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class TarefaService {
-    private TarefaRepository repository;
+    private final TarefaRepository repository;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     public TarefaService(TarefaRepository repository) {
         this.repository = repository;
@@ -33,7 +39,13 @@ public class TarefaService {
     }
 
     public List<TarefaResponseDTO> listarTarefas() {
-        return repository.findAll().stream().map(this::toTarefaResponseDTO).collect(Collectors.toList());
+        List<TarefaResponseDTO> tarefasSemOrdem =  repository.findAll().stream().map(this::toTarefaResponseDTO).collect(Collectors.toList());
+
+        List<TarefaRequestDTO> mudarTipo = tarefasSemOrdem.stream().map(tarefaResponseDTO -> modelMapper.map(tarefaResponseDTO, TarefaRequestDTO.class)).collect(Collectors.toList());
+
+        otimizarLista(mudarTipo);
+
+        return mudarTipo.stream().map(tarefaRequestDTO -> modelMapper.map(tarefaRequestDTO, TarefaResponseDTO.class)).collect(Collectors.toList());
     }
 
     public TarefaResponseDTO buscarId(Long id){
@@ -45,11 +57,14 @@ public class TarefaService {
 
         tarefa.setNomeTarefa(dados.getNomeTarefa());
         tarefa.setDuracao(dados.getDuracao());
-        tarefa.setCategoria(dados.getCategoria());
+        tarefa.setCategoria(modelMapper.map(dados.getCategoria(), Categoria.class));
         tarefa.setPrioridade(dados.getPrioridade());
-        tarefa.setUsuario(dados.getUsuario());
+
 
         repository.save(tarefa);
+
+
+
 
         return toTarefaResponseDTO(tarefa);
     }
@@ -59,9 +74,8 @@ public class TarefaService {
 
         tarefa.setNomeTarefa(dados.getNomeTarefa());
         tarefa.setDuracao(dados.getDuracao());
-        tarefa.setCategoria(dados.getCategoria());
+        tarefa.setCategoria(modelMapper.map(dados.getCategoria(), Categoria.class));
         tarefa.setPrioridade(dados.getPrioridade());
-        tarefa.setUsuario(dados.getUsuario());
 
         Tarefa atualizada = repository.save(tarefa);
 
@@ -73,6 +87,29 @@ public class TarefaService {
     }
 
 
+    public List<TarefaResponseDTO> otimizarLista(List<TarefaRequestDTO> tarefas) {
+
+        Comparator<TarefaRequestDTO> porPrioridade = Comparator
+                .comparing(
+                        (TarefaRequestDTO t)-> t.getPrioridade().getNivel(),
+                        Comparator.reverseOrder()//coloca em ordem decrescente
+                );
+
+        Comparator<TarefaRequestDTO> porDuracao = Comparator
+                .comparing(
+                        TarefaRequestDTO::getDuracao,
+                        Comparator.reverseOrder()
+                );
+
+        Comparator<TarefaRequestDTO> otimizadorCompleto = porPrioridade
+                .thenComparing(porDuracao);
+
+        tarefas.sort(otimizadorCompleto);
+
+
+        return tarefas.stream().map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class))
+                .collect(Collectors.toList());
+    }
 
 
 

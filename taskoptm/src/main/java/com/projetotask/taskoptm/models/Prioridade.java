@@ -1,19 +1,21 @@
 package com.projetotask.taskoptm.models;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+
 public enum Prioridade {
 
-    ALTA("Alta"),
-    MEDIA("Média"),
-    BAIXA("Baixa");
+    ALTA(3),
+    MEDIA(2),
+    BAIXA(1);
 
-    private final String descricao;
+    private final Integer nivel;
 
-    private Prioridade(String descricao){
-        this.descricao=descricao;
+    Prioridade(Integer nivel){
+        this.nivel=nivel;
     }
 
-    public String getDescricao(){
-        return descricao;
+    public int getNivel(){
+        return nivel;
     }
 
 }
