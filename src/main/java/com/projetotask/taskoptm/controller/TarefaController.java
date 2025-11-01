@@ -17,9 +17,9 @@ public class TarefaController {
         this.service = service;
     }
 
-    @GetMapping
-    public List<TarefaResponseDTO> listarTarefas() {
-         return service.listarTarefas();
+    @GetMapping("/usuario/{idUsuario}")
+    public List<TarefaResponseDTO> listarTarefas(Long idUsuario) {
+         return service.listarTarefas(idUsuario);
 
     }
 
@@ -34,9 +34,9 @@ public class TarefaController {
         return service.atualizar(id,dto);
     }
 
-    @PostMapping
-    public TarefaResponseDTO salvar(@RequestBody TarefaRequestDTO dados){
-        return service.salvar(dados);
+    @PostMapping("/usuario/{idUsuario}")
+    public TarefaResponseDTO salvar(@PathVariable Long idUsuario, @RequestBody TarefaRequestDTO dados){
+        return service.salvar(idUsuario,dados);
     }
 
     @DeleteMapping("/{id}")

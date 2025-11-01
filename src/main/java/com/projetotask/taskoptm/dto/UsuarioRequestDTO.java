@@ -10,6 +10,5 @@ import java.util.List;
 @Data
 public class UsuarioRequestDTO {
     private String nomeUsuario;
-    private List<TarefaRequestDTO> tarefas;
     private String senha;
 }

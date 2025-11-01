@@ -4,6 +4,7 @@ import com.projetotask.taskoptm.dto.TarefaRequestDTO;
 import com.projetotask.taskoptm.dto.TarefaResponseDTO;
 import com.projetotask.taskoptm.dto.UsuarioRequestDTO;
 import com.projetotask.taskoptm.dto.UsuarioResponseDTO;
+import com.projetotask.taskoptm.exceptions.UsuarioNaoEncontradoException;
 import com.projetotask.taskoptm.models.Tarefa;
 import com.projetotask.taskoptm.models.Usuario;
 import com.projetotask.taskoptm.repository.UsuarioRepository;
@@ -23,14 +24,9 @@ import java.util.stream.Collectors;
 public class UsuarioService {
 
     private final UsuarioRepository repository;
-    private final TarefaService tarefaService;
 
-    private final ModelMapper modelMapper;
-
-    public UsuarioService(UsuarioRepository repository, TarefaService tarefaService, ModelMapper modelMapper) {
+    public UsuarioService(UsuarioRepository repository) {
         this.repository = repository;
-        this.tarefaService = tarefaService;
-        this.modelMapper=modelMapper;
     }
 
 
@@ -48,19 +44,13 @@ public class UsuarioService {
 
     }
 
+
+
     public UsuarioResponseDTO salvarUsuario(UsuarioRequestDTO dto){
         Usuario usuario =  new Usuario();
         usuario.setNomeUsuario(dto.getNomeUsuario());
         usuario.setSenha(dto.getSenha());
 
-        List<Tarefa> tarefasParaSalvar = dto.getTarefas()
-                        .stream()
-                        .map(tarefaRequestDTO ->modelMapper.map(tarefaRequestDTO, Tarefa.class))
-                        .collect(Collectors.toList());
-
-        usuario.setTarefas(tarefasParaSalvar);
-
-        tarefaService.salvar(dto.getTarefas());
 
         Usuario salvo = repository.save(usuario);
 
@@ -86,16 +76,18 @@ public class UsuarioService {
         repository.deleteById(id);
     }
 
+    public Usuario buscarEntidadePorId(Long id){
+        return  repository.findById(id)
+                .orElseThrow(UsuarioNaoEncontradoException::new);
+    }
+
     //PRA PODER RETONAR DTO USANDO DADOS DO TIPO REPOSITORY
 
     private UsuarioResponseDTO toResponseDTO(Usuario usuario){
         UsuarioResponseDTO dto = new UsuarioResponseDTO();
         dto.setIdUsuario(usuario.getIdUsuario());
         dto.setNomeUsuario(usuario.getNomeUsuario());
-        dto.setTarefas(usuario.getTarefas()
-                .stream()
-                .map(tarefaService::toTarefaResponseDTO)
-                .collect(Collectors.toList()));
+
 
         return dto;
     }

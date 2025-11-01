@@ -27,11 +27,6 @@ public class Tarefa {
     @Enumerated(EnumType.STRING)
     private Prioridade prioridade;
 
-    //relacionamento n pra 1 muitas tarefas podem possuir 1 categoria
-    @ManyToOne
-    @JoinColumn(name = "idCategoria")
-    private Categoria categoria;
-
     @ManyToOne
     @JoinColumn(name = "idUsuario")
     private Usuario usuario;
