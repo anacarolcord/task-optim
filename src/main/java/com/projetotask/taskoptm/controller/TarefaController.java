@@ -18,7 +18,7 @@ public class TarefaController {
     }
 
     @GetMapping("/usuario/{idUsuario}")
-    public List<TarefaResponseDTO> listarTarefas(Long idUsuario) {
+    public List<TarefaResponseDTO> listarTarefas(@PathVariable Long idUsuario) {
          return service.listarTarefas(idUsuario);
 
     }
@@ -29,9 +29,9 @@ public class TarefaController {
         return service.buscarId(id);
     }
 
-    @PutMapping("/{id}")
-    public TarefaResponseDTO atualizar(@PathVariable Long id, @RequestBody TarefaRequestDTO dto) {
-        return service.atualizar(id,dto);
+    @PutMapping("/{idUsuario}/{idTarefa}")
+    public TarefaResponseDTO atualizar(@PathVariable Long idUsuario, @PathVariable Long idTarefa, @RequestBody TarefaRequestDTO dto) {
+        return service.atualizar(idUsuario,idTarefa,dto);
     }
 
     @PostMapping("/usuario/{idUsuario}")

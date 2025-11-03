@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,6 +22,6 @@ public class Evento {
     private String nomeEvento;
     private String descricaoEvento;
 
-    @ManyToMany(mappedBy = "eventos")
-    private List<Tarefa> tarefas;
+    @ManyToMany(mappedBy = "eventos", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private List<Tarefa> tarefas = new ArrayList<Tarefa>();
 }
