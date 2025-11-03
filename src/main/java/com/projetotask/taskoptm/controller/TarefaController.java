@@ -1,5 +1,6 @@
 package com.projetotask.taskoptm.controller;
 
+import com.projetotask.taskoptm.dto.AtualizarTarefaComEventoRequest;
 import com.projetotask.taskoptm.dto.TarefaRequestDTO;
 import com.projetotask.taskoptm.dto.TarefaResponseDTO;
 import com.projetotask.taskoptm.service.TarefaService;
@@ -30,8 +31,8 @@ public class TarefaController {
     }
 
     @PutMapping("/{idUsuario}/{idTarefa}")
-    public TarefaResponseDTO atualizar(@PathVariable Long idUsuario, @PathVariable Long idTarefa, @RequestBody TarefaRequestDTO dto) {
-        return service.atualizar(idUsuario,idTarefa,dto);
+    public TarefaResponseDTO atualizarEventos(@PathVariable Long idUsuario, @PathVariable Long idTarefa, @RequestBody AtualizarTarefaComEventoRequest dto) {
+        return service.atualizarEvento(idUsuario,idTarefa,dto);
     }
 
     @PostMapping("/usuario/{idUsuario}")

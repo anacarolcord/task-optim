@@ -25,12 +25,14 @@ import java.util.stream.Collectors;
 public class TarefaService {
     private final TarefaRepository repository;
     private final UsuarioService usuarioService;
+    private final EventoService eventoService;
     private final ModelMapper modelMapper;
 
-    public TarefaService(TarefaRepository repository, UsuarioService usuarioService, ModelMapper modelMapper) {
+    public TarefaService(TarefaRepository repository, UsuarioService usuarioService, ModelMapper modelMapper,EventoService eventoService) {
         this.repository = repository;
         this.usuarioService=usuarioService;
         this.modelMapper=modelMapper;
+        this.eventoService=eventoService;
     }
 
     public TarefaResponseDTO toTarefaResponseDTO(Tarefa tarefa){
@@ -97,16 +99,23 @@ public class TarefaService {
         return toTarefaResponseDTO(tarefa);
     }
 
-    public TarefaResponseDTO atualizar(Long idUsuario, Long idTarefa, TarefaRequestDTO dados) {
+    public TarefaResponseDTO atualizarEvento(Long idUsuario, Long idTarefa, AtualizarTarefaComEventoRequest dados) {
         Usuario usuarioExiste = usuarioService.buscarEntidadePorId(idUsuario);
         Tarefa tarefa = repository.findById(idTarefa).orElseThrow(()-> new RuntimeException("Tarefa não encontrada"));
 
-        tarefa.setNomeTarefa(dados.getNomeTarefa());
-        tarefa.setDuracao(dados.getDuracao());
-        tarefa.setPrioridade(dados.getPrioridade());
-        tarefa.setEventos(dados.getEventos());
+        //salvo esse evento que veio do request
+        EventoResponseDTO eventoResponseDTO = eventoService.salvar(modelMapper.map(dados.getEventos().getFirst(), EventoRequestDTO.class));
+        //pego a lista de eventos
+        List<EventoResponseDTO> eventoList = eventoService.listar();
+        //guardo esse evento em uma lista para usá-la
+        eventoList.add(eventoResponseDTO);
+        //converto essa lista para o tipo Evento e salvo na tarefa
+       List<Evento> eventoConvertido = eventoList.stream()
+               .map(eventoResponseDTO1 -> modelMapper.map(eventoResponseDTO1, Evento.class))
+               .collect(Collectors.toList());
 
-        //PRECISA ADICIONAR A FUNCAO DE SALVAR ESSE NOVO EVENTO NO BANCO!!
+
+        tarefa.setEventos(eventoConvertido);
 
 
         //se a tarefa do request tiver um evento igual a CANCELADO
@@ -118,7 +127,9 @@ public class TarefaService {
 
         //crio uma lista que tira a tarefa com evento CANCELADO da lista do usuario
         // e mantem somente as tarefas sem evento
-       List<Tarefa> tarefasLimpas =  usuarioExiste.getTarefas().stream().dropWhile(tarefa1 -> tarefaComEventoCancelado).toList();
+       List<Tarefa> tarefasLimpas =  usuarioExiste.getTarefas()
+               .stream()
+               .filter(tarefa1 -> !tarefaComEventoCancelado).collect(Collectors.toList());
 
        //na lista de tarefas do usuario guardo essa nova lista limpa
        usuarioExiste.setTarefas(tarefasLimpas);
