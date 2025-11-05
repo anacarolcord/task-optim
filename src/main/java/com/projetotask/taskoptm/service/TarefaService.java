@@ -46,9 +46,19 @@ public class TarefaService {
     }
 
     public List<TarefaResponseDTO> listarTarefas(Long id) {
-        List<TarefaResponseDTO> tarefasSemOrdem =  repository.findAllByUsuarioIdUsuario(id).stream().map(this::toTarefaResponseDTO).collect(Collectors.toList());
 
-        List<TarefaRequestDTO> mudarTipo = tarefasSemOrdem.stream().map(tarefaResponseDTO -> modelMapper.map(tarefaResponseDTO, TarefaRequestDTO.class)).collect(Collectors.toList());
+        Usuario usuarioExiste = usuarioService.buscarEntidadePorId(id);
+        //aplicar o filtro das tarefas no GET !!!
+        //List<TarefaResponseDTO> tarefasSemOrdem =  repository.findAllByUsuarioIdUsuario(id).stream().map(this::toTarefaResponseDTO).collect(Collectors.toList());
+
+
+        List<Tarefa> tarefasLimpas =  usuarioExiste.getTarefas()
+                .stream()
+                .filter(tarefa1 -> !tarefa1.getEventos().stream()
+                        .anyMatch(evento -> evento.getNomeEvento().equalsIgnoreCase("CANCELADO")))
+                .collect(Collectors.toList());
+
+        List<TarefaRequestDTO> mudarTipo = tarefasLimpas.stream().map(tarefa -> modelMapper.map(tarefa, TarefaRequestDTO.class)).collect(Collectors.toList());
 
         otimizarLista(mudarTipo);
 
@@ -117,26 +127,37 @@ public class TarefaService {
 
         tarefa.setEventos(eventoConvertido);
 
+        Tarefa atualizada = repository.save(tarefa);
+
 
         //se a tarefa do request tiver um evento igual a CANCELADO
         //ENTAO A TAREFA É EXCLUIDA DA LISTA DO USUARIO
 
         //variavel que guarda tarefa com evento CANCELADO
-        boolean tarefaComEventoCancelado = tarefa.getEventos().stream().map(Evento::getNomeEvento)
-                .anyMatch(s -> s.equalsIgnoreCase("CANCELADO"));
+        //boolean tarefaComEventoCancelado = tarefa.getEventos().stream().map(Evento::getNomeEvento)
+                //.anyMatch(s -> s.equalsIgnoreCase("CANCELADO"));
 
         //crio uma lista que tira a tarefa com evento CANCELADO da lista do usuario
         // e mantem somente as tarefas sem evento
        List<Tarefa> tarefasLimpas =  usuarioExiste.getTarefas()
                .stream()
-               .filter(tarefa1 -> !tarefaComEventoCancelado).collect(Collectors.toList());
+               .filter(tarefa1 -> !tarefa1.getEventos().stream()
+                       .anyMatch(evento -> !evento.getNomeEvento().equalsIgnoreCase("CANCELADO")))
+               .collect(Collectors.toList());
 
+       List<TarefaRequestDTO> tarefasParaOtimizar = tarefasLimpas.stream()
+               .map(tarefass->modelMapper.map(tarefass, TarefaRequestDTO.class)).collect(Collectors.toList());
+
+
+        otimizarLista(tarefasParaOtimizar);
        //na lista de tarefas do usuario guardo essa nova lista limpa
        usuarioExiste.setTarefas(tarefasLimpas);
 
-
         //salvo a tarefa que foi atualizada
-        Tarefa atualizada = repository.save(tarefa);
+
+        UsuarioRequestDTO convertido = modelMapper.map(usuarioExiste,UsuarioRequestDTO.class);
+        usuarioService.salvarUsuario(convertido);
+
 
         return toTarefaResponseDTO(atualizada);
     }
@@ -146,7 +167,7 @@ public class TarefaService {
     }
 
 
-    public void otimizarLista(List<TarefaRequestDTO> tarefas) {
+    public List<TarefaResponseDTO> otimizarLista(List<TarefaRequestDTO> tarefas) {
 
         Comparator<TarefaRequestDTO> porPrioridade = Comparator
                 .comparing(
@@ -160,15 +181,6 @@ public class TarefaService {
                         Comparator.reverseOrder()
                 );
 
-        Comparator<TarefaRequestDTO> porEvento = Comparator
-                .comparing(
-                        (TarefaRequestDTO t)->t.getEventos().stream().anyMatch(evento -> evento.getNomeEvento().equalsIgnoreCase("CANCELADO")),
-                        Comparator.reverseOrder()
-                );
-
-
-        List<TarefaRequestDTO> tarefaComEvento  = tarefas.stream().filter(tarefaRequestDTO -> tarefaRequestDTO.getEventos()
-                .stream().anyMatch(evento -> evento.getNomeEvento().equalsIgnoreCase("CANCELADO"))).toList();
 
         Comparator<TarefaRequestDTO> otimizadorCompleto = porPrioridade
                 .thenComparing(porDuracao);
@@ -176,8 +188,11 @@ public class TarefaService {
         tarefas.sort(otimizadorCompleto);
 
 
-        //tarefas.stream().map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class))
-                //.collect(Collectors.toList());
+
+
+       return tarefas.stream().map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class)).collect(Collectors.toList());
+
+
     }
 
     public TarefaResponseDTO adicionarEvento(List <Evento> eventos, Long idTarefa){

@@ -129,3 +129,6 @@ JOIN TAREFA ON USUARIO.ID_TAREFA = TAREFA.ID_TAREFA [42122-232]
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:493)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-11-03 23:44:04.501401-03:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "INTO" not found; SQL statement:
+DELETE INTO EVENTO [42102-232]
